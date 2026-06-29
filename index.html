@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เว็บแอปยืม-คืนอุปกรณ์โน้ตบุ๊กสำหรับนักศึกษาและอาจารย์</title>
+    <!-- Google Fonts: Outfit (English) & Noto Sans Thai (Thai) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Pastel Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="app-container">
+
+        <!-- 1. LOGIN SECTION -->
+        <section id="login-section" class="auth-section">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="logo-wrapper">
+                        <i data-lucide="graduation-cap" class="logo-icon"></i>
+                    </div>
+                    <h1>เว็บแอปยืม-คืนอุปกรณ์โน้ตบุ๊ก</h1>
+                    <p>ระบบจัดการยืม-คืนอุปกรณ์โน้ตบุ๊กสำหรับนักศึกษาและอาจารย์</p>
+                </div>
+
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="username">ชื่อผู้ใช้งาน หรือ รหัสนักศึกษา (Username)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user" class="field-icon"></i>
+                            <input type="text" id="username" placeholder="กรอกชื่อผู้ใช้งานหรือรหัสนักศึกษา..." required autocomplete="username">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">รหัสผ่าน (Password)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock" class="field-icon"></i>
+                            <input type="password" id="password" placeholder="กรอกรหัสผ่าน..." required autocomplete="current-password">
+                        </div>
+                    </div>
+
+                    <div class="error-msg" id="login-error">
+                        <i data-lucide="alert-circle" class="err-icon"></i>
+                        <span id="error-text">ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-glow">
+                        <span>เข้าสู่ระบบเพื่อใช้งาน</span>
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                    
+                    <p class="auth-toggle-text" style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                        ยังไม่มีบัญชีแผนก? <a href="#" id="link-go-register" style="color: var(--accent-purple); font-weight: 700; text-decoration: none; border-bottom: 1.5px solid rgba(124, 58, 237, 0.3);">สมัครสมาชิกที่นี่</a>
+                    </p>
+                </form>
+
+                <!-- REGISTER FORM (Hidden by default) -->
+                <form id="register-form" class="hidden">
+                    <div class="input-group">
+                        <label for="reg-username">ชื่อผู้ใช้งาน หรือ รหัสนักศึกษา (Username) *</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user" class="field-icon"></i>
+                            <input type="text" id="reg-username" placeholder="ตั้งชื่อผู้ใช้งาน หรือรหัสนักศึกษา..." required autocomplete="username">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="reg-password">รหัสผ่าน (Password) *</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock" class="field-icon"></i>
+                            <input type="password" id="reg-password" placeholder="ตั้งรหัสผ่านของคุณ..." required autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="reg-name">ชื่อ-นามสกุลจริง (Full Name) *</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user-check" class="field-icon"></i>
+                            <input type="text" id="reg-name" placeholder="กรอกชื่อและนามสกุลจริง..." required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="reg-dept">ระดับชั้น / แผนกสาขา (Department) *</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="graduation-cap" class="field-icon"></i>
+                            <input type="text" id="reg-dept" placeholder="เช่น นักศึกษา ปี 3, เทคโนโลยีธุรกิจดิจิทัล..." required>
+                        </div>
+                    </div>
+
+
+                    <div class="error-msg" id="register-error">
+                        <i data-lucide="alert-circle" class="err-icon"></i>
+                        <span id="register-error-text">ข้อมูลไม่ครบถ้วน หรือมีชื่อผู้ใช้นี้ในระบบแล้ว</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-glow" style="background: linear-gradient(135deg, var(--accent-yellow), var(--accent-purple)); border-color: rgba(255,255,255,0.2);">
+                        <span>ลงทะเบียนเพื่อรับสิทธิ์</span>
+                        <i data-lucide="user-plus"></i>
+                    </button>
+
+                    <p class="auth-toggle-text" style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                        มีบัญชีผู้ใช้งานแล้ว? <a href="#" id="link-go-login" style="color: var(--accent-purple); font-weight: 700; text-decoration: none; border-bottom: 1.5px solid rgba(124, 58, 237, 0.3);">เข้าสู่ระบบที่นี่</a>
+                    </p>
+                </form>
+
+            </div>
+        </section>
+
+        <!-- 2. DASHBOARD SECTION -->
+        <section id="dashboard-section" class="dashboard-section hidden">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="brand">
+                        <i data-lucide="graduation-cap" class="brand-icon"></i>
+                        <span>ยืม-คืนโน้ตบุ๊ก</span>
+                    </div>
+                </div>
+
+                <!-- User Profile Summary in Sidebar -->
+                <div class="user-profile-card">
+                    <div class="avatar" id="user-avatar">
+                        <span id="user-avatar-initial">U</span>
+                    </div>
+                    <div class="user-meta">
+                        <h4 id="user-display-name">ชื่อผู้ใช้งาน</h4>
+                        <p id="user-display-dept">สาขาธุรกิจดิจิทัล</p>
+                        <span class="badge" id="user-role-badge">นักศึกษา</span>
+                    </div>
+                </div>
+
+                <!-- Sidebar Navigation Menu -->
+                <nav class="sidebar-menu">
+                    <button class="menu-item active" data-tab="equipment-tab">
+                        <i data-lucide="laptop"></i>
+                        <span>รายการอุปกรณ์ทั้งหมด</span>
+                    </button>
+                    <button class="menu-item" data-tab="my-items-tab">
+                        <i data-lucide="book-open"></i>
+                        <span>อุปกรณ์ที่ฉันยืมเรียน</span>
+                        <span class="menu-badge hidden" id="my-borrow-count">0</span>
+                    </button>
+                    <button class="menu-item" data-tab="history-tab">
+                        <i data-lucide="history"></i>
+                        <span>ประวัติการยืม-คืน</span>
+                    </button>
+                    <button class="menu-item admin-only hidden" data-tab="admin-tab">
+                        <i data-lucide="settings"></i>
+                        <span>จัดการระบบ (อาจารย์)</span>
+                    </button>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="sidebar-footer">
+                    <button class="btn btn-logout" id="btn-logout">
+                        <i data-lucide="log-out"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Dashboard Content Area -->
+            <main class="main-content">
+                <header class="main-header">
+                    <div class="header-title">
+                        <h2 id="current-tab-title">รายการอุปกรณ์ทั้งหมด</h2>
+                        <p id="current-tab-subtitle">ค้นหาอุปกรณ์การเรียน โน๊ตบุ๊ค และเครื่องมือต่อพ่วงต่างๆ สำหรับใช้ในการเรียนการสอน</p>
+                    </div>
+                    <div class="header-actions">
+                        <div class="current-date-badge">
+                            <i data-lucide="calendar"></i>
+                            <span id="live-date">วันที่ 25 พฤษภาคม 2026</span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Dynamic Content Views -->
+                <div class="content-body">
+                    
+                    <!-- TAB 1: EQUIPMENT LIST -->
+                    <div id="equipment-tab" class="tab-content active">
+                        <!-- Stats Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card stat-purple">
+                                <div class="stat-icon-wrapper">
+                                    <i data-lucide="layers"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>อุปกรณ์ในแผนก</h3>
+                                    <p class="stat-val" id="stat-total">0</p>
+                                </div>
+                            </div>
+                            <div class="stat-card stat-yellow">
+                                <div class="stat-icon-wrapper">
+                                    <i data-lucide="smile"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>พร้อมให้ยืมเรียน</h3>
+                                    <p class="stat-val" id="stat-available">0</p>
+                                </div>
+                            </div>
+                            <div class="stat-card stat-purple">
+                                <div class="stat-icon-wrapper">
+                                    <i data-lucide="book-open"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>กำลังถูกใช้งานอยู่</h3>
+                                    <p class="stat-val" id="stat-borrowed">0</p>
+                                </div>
+                            </div>
+                            <div class="stat-card stat-yellow">
+                                <div class="stat-icon-wrapper">
+                                    <i data-lucide="percent"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>อัตราการใช้งาน</h3>
+                                    <p class="stat-val" id="stat-rate">0%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search and Categories Filter Bar -->
+                        <div class="filter-bar">
+                            <div class="search-input-group">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" id="search-equipment" placeholder="ค้นหาตามชื่ออุปกรณ์ รหัสครุภัณฑ์ หรือรุ่น...">
+                            </div>
+                            <div class="category-filters" id="category-filters">
+                                <button class="filter-pill active" data-category="all">ทั้งหมด</button>
+                                <button class="filter-pill" data-category="Notebook">Notebook</button>
+                                <button class="filter-pill" data-category="Mouse">Mouse</button>
+                                <button class="filter-pill" data-category="Keyboard">Keyboard</button>
+                                <button class="filter-pill" data-category="Charger">Laptop Charger</button>
+                            </div>
+                        </div>
+
+                        <!-- Equipment Grid Container -->
+                        <div class="equipment-grid" id="equipment-grid-container">
+                            <div class="loading-spinner">
+                                <i data-lucide="loader" class="spin"></i> กำลังโหลดข้อมูล...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: MY BORROWED ITEMS -->
+                    <div id="my-items-tab" class="tab-content">
+                        <div class="my-items-container">
+                            <div class="info-banner">
+                                <i data-lucide="info"></i>
+                                <span>เมื่อใช้งานเสร็จสิ้นแล้ว กรุณานำอุปกรณ์มาคืนที่ห้องวิชาการแผนก และกดส่งคืนในระบบด้านล่างนี้</span>
+                            </div>
+                            <div class="glass-table-wrapper">
+                                <table class="glass-table">
+                                    <thead>
+                                        <tr>
+                                            <th>รหัสครุภัณฑ์</th>
+                                            <th>รูป/ชื่ออุปกรณ์</th>
+                                            <th>หมวดหมู่</th>
+                                            <th>วันที่ยืมเรียน</th>
+                                            <th>กำหนดส่งคืน</th>
+                                            <th>การจัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="my-borrow-table-body">
+                                        <!-- JS will dynamically populate here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="empty-state hidden" id="my-borrow-empty">
+                                <i data-lucide="smile" class="empty-icon"></i>
+                                <h3>คุณยังไม่มีประวัติการยืมอุปกรณ์ในขณะนี้</h3>
+                                <p>สามารถค้นหาอุปกรณ์การเรียนและกดขอยืมได้ที่แท็บ "รายการอุปกรณ์ทั้งหมด"</p>
+                                <button class="btn btn-primary" onclick="switchTab('equipment-tab')">ดูอุปกรณ์ทั้งหมด</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: BORROW HISTORY -->
+                    <div id="history-tab" class="tab-content">
+                        <div class="history-container">
+                            <div class="filter-bar border-bottom">
+                                <div class="search-input-group">
+                                    <i data-lucide="search" class="search-icon"></i>
+                                    <input type="text" id="search-history" placeholder="ค้นหาประวัติด้วยชื่อผู้ยืม, ชั้นปี หรือชื่ออุปกรณ์...">
+                                </div>
+                                <div class="history-actions">
+                                    <button class="btn btn-outline btn-sm" onclick="exportHistoryToCSV()">
+                                        <i data-lucide="download"></i> ส่งออกข้อมูลประวัติ (CSV)
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="glass-table-wrapper">
+                                <table class="glass-table">
+                                    <thead>
+                                        <tr>
+                                            <th>วันเวลาทำรายการ</th>
+                                            <th>ผู้ยืมเรียน (ระดับชั้น/แผนก)</th>
+                                            <th>อุปกรณ์การเรียน</th>
+                                            <th>วันที่เริ่มยืม</th>
+                                            <th>วันที่ส่งคืน</th>
+                                            <th>สถานะรายการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <!-- JS will dynamically populate here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="empty-state hidden" id="history-empty">
+                                <i data-lucide="scroll-text" class="empty-icon"></i>
+                                <h3>ยังไม่มีบันทึกประวัติการยืม-คืนอุปกรณ์</h3>
+                                <p>เมื่อเริ่มมีการกดยืมหรือคืนอุปกรณ์ ข้อมูลประวัติการทำรายการทั้งหมดจะถูกบันทึกขึ้นตรงนี้</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: ADMIN MANAGEMENT PANEL -->
+                    <div id="admin-tab" class="tab-content">
+                        <div class="admin-grid">
+                            <!-- Left: Form to Add New Equipment -->
+                            <div class="glass-card admin-form-card">
+                                <div class="card-header">
+                                    <i data-lucide="plus-circle" class="header-icon neon-text-blue"></i>
+                                    <h3>ขึ้นทะเบียนเครื่องมือ/อุปกรณ์ใหม่</h3>
+                                </div>
+                                <form id="add-equipment-form">
+                                    <div class="input-group">
+                                        <label for="eq-name">ชื่อครุภัณฑ์/อุปกรณ์ (Equipment Name)</label>
+                                        <div class="input-wrapper">
+                                            <input type="text" id="eq-name" placeholder="เช่น Notebook Acer Swift, เมาส์ไร้สาย..." required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="input-group">
+                                        <label for="eq-category">ประเภทเครื่องมือ (Category)</label>
+                                        <div class="input-wrapper select-wrapper">
+                                            <select id="eq-category" required>
+                                                <option value="Notebook">Notebook</option>
+                                                <option value="Mouse">Mouse</option>
+                                                <option value="Keyboard">Keyboard</option>
+                                                <option value="Charger">Laptop Charger</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group">
+                                        <label for="eq-code">รหัสครุภัณฑ์สาขา (Asset ID)</label>
+                                        <div class="input-wrapper">
+                                            <input type="text" id="eq-code" placeholder="เช่น BTEC-NB-001" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group">
+                                        <label for="eq-spec">รายละเอียด/คุณสมบัติเครื่อง (Specs)</label>
+                                        <div class="input-wrapper">
+                                            <textarea id="eq-spec" placeholder="เช่น Core i5, RAM 8GB, สำหรับชั้นเรียนธุรกิจดิจิทัล" rows="3"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-block btn-glow">
+                                        <i data-lucide="save"></i>
+                                        <span>บันทึกและขึ้นทะเบียนอุปกรณ์</span>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Right: Statistics & Danger Zone -->
+                            <div class="glass-card admin-control-card">
+                                <div class="card-header">
+                                    <i data-lucide="sliders" class="header-icon neon-text-purple"></i>
+                                    <h3>การจัดการของคณาจารย์</h3>
+                                </div>
+                                <div class="control-actions">
+                                    <div class="control-row">
+                                        <div class="control-desc">
+                                            <h4>รีเซ็ตฐานข้อมูลการศึกษา</h4>
+                                            <p>คืนค่าข้อมูลอุปกรณ์และล้างประวัติการยืมทั้งหมดให้กลับเป็นค่าเริ่มต้นดั้งเดิม</p>
+                                        </div>
+                                        <button class="btn btn-danger btn-sm" onclick="resetSystemData()">
+                                            <i data-lucide="rotate-ccw"></i> รีเซ็ตฐานข้อมูล
+                                        </button>
+                                    </div>
+
+                                    <div class="control-row">
+                                        <div class="control-desc">
+                                            <h4>รายชื่อผู้มีสิทธิ์ใช้งานขณะนี้</h4>
+                                            <p>คณาจารย์และนักศึกษาที่มีบัญชีในระบบ</p>
+                                        </div>
+                                        <div class="user-list-preview" id="admin-user-list-preview">
+                                            <!-- Dynamically populated from JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </section>
+    </div>
+
+    <!-- 3. BORROW MODAL -->
+    <div id="borrow-modal" class="modal-overlay hidden">
+        <div class="modal-card animate-zoom">
+            <button class="modal-close" id="btn-close-modal">
+                <i data-lucide="x"></i>
+            </button>
+            <div class="modal-header">
+                <div class="modal-icon-wrapper">
+                    <i data-lucide="bookmark-check" class="neon-text-blue"></i>
+                </div>
+                <h2>ยืนยันการยืมอุปกรณ์การเรียน</h2>
+                <p>กรุณาระบุวันที่คุณสัญญาว่าจะส่งคืนเพื่อทำการขอยืมอุปกรณ์เข้าชั้นเรียน</p>
+            </div>
+            <div class="modal-body">
+                <div class="borrow-item-preview">
+                    <i data-lucide="laptop" class="item-preview-icon" id="modal-item-icon"></i>
+                    <div>
+                        <h4 id="modal-item-name">Dell Latitude 5420</h4>
+                        <span class="badge" id="modal-item-code">IT-NB-001</span>
+                    </div>
+                </div>
+
+                <form id="borrow-form">
+                    <input type="hidden" id="borrow-item-id">
+                    
+                    <div class="modal-info-grid">
+                        <div class="info-row">
+                            <span class="info-lbl">ผู้ยืมเรียน:</span>
+                            <span class="info-val" id="modal-borrower-name">สมชาย ใจดี</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-lbl">ระดับชั้น/แผนก:</span>
+                            <span class="info-val badge badge-blue" id="modal-borrower-dept">นักศึกษา ปี 3</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-lbl">วันที่เริ่มยืม:</span>
+                            <span class="info-val" id="modal-borrow-date">25/05/2026</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="expected-return-date">วันที่กำหนดส่งคืน (Expected Return Date) *</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="calendar" class="field-icon"></i>
+                            <input type="date" id="expected-return-date" required>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="btn-cancel-borrow">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary btn-glow">
+                            <i data-lucide="check"></i>
+                            <span>ยืนยันการยืมเรียน</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. EDIT EQUIPMENT MODAL (Admin Only) -->
+    <div id="edit-modal" class="modal-overlay hidden">
+        <div class="modal-card animate-zoom" style="max-width: 580px;">
+            <button class="modal-close" id="btn-close-edit-modal">
+                <i data-lucide="x"></i>
+            </button>
+            <div class="modal-header">
+                <div class="modal-icon-wrapper" style="background: rgba(202, 138, 4, 0.15); border-color: var(--accent-yellow);">
+                    <i data-lucide="edit-3" class="neon-text-purple"></i>
+                </div>
+                <h2>แก้ไขข้อมูลเครื่องมือ / อุปกรณ์</h2>
+                <p>ปรับปรุงรายละเอียดสเปก รหัส หรือแก้ไขสถานะการครอบครองเครื่องมือ</p>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form">
+                    <input type="hidden" id="edit-item-id">
+                    
+                    <div class="input-group">
+                        <label for="edit-eq-name">ชื่อครุภัณฑ์/อุปกรณ์ (Equipment Name) *</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="edit-eq-name" placeholder="เช่น Notebook Acer Swift..." required>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="input-group">
+                            <label for="edit-eq-category">ประเภทเครื่องมือ (Category) *</label>
+                            <div class="input-wrapper select-wrapper">
+                                <select id="edit-eq-category" required>
+                                    <option value="Notebook">Notebook</option>
+                                    <option value="Mouse">Mouse</option>
+                                    <option value="Keyboard">Keyboard</option>
+                                    <option value="Charger">Laptop Charger</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="edit-eq-code">รหัสครุภัณฑ์สาขา (Asset ID) *</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="edit-eq-code" placeholder="เช่น BTEC-NB-001" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="edit-eq-spec">รายละเอียด/คุณสมบัติเครื่อง (Specs) *</label>
+                        <div class="input-wrapper">
+                            <textarea id="edit-eq-spec" placeholder="รายละเอียดสเปกเครื่องมือ..." rows="3" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label for="edit-eq-status">สถานะปัจจุบัน (Status) *</label>
+                        <div class="input-wrapper select-wrapper">
+                            <select id="edit-eq-status" required>
+                                <option value="Available">พร้อมให้ยืม (Available)</option>
+                                <option value="Borrowed">กำลังถูกยืมใช้งาน (Borrowed)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Borrower Details for Admin Editing -->
+                    <div id="edit-borrower-details" class="hidden" style="background: rgba(124, 58, 237, 0.03); border: 1.5px dashed rgba(124, 58, 237, 0.15); border-radius: var(--radius-md); padding: 18px; margin-bottom: 22px;">
+                        <h4 style="font-size: 0.825rem; font-weight: 700; color: var(--accent-purple); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                            <i data-lucide="user-cog" style="width: 16px; height: 16px;"></i> ข้อมูลรายละเอียดการยืมใช้งานเครื่อง
+                        </h4>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label for="edit-borrower-username" style="font-size: 0.75rem;">Username ผู้ยืม (บัญชีผู้ใช้) *</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="edit-borrower-username" placeholder="เช่น somchai">
+                                </div>
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label for="edit-borrower-name" style="font-size: 0.75rem;">ชื่อ-นามสกุลจริงผู้ยืม *</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="edit-borrower-name" placeholder="เช่น สมชาย ใจดี">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group" style="margin-bottom: 12px;">
+                            <label for="edit-borrower-dept" style="font-size: 0.75rem;">ระดับชั้น / แผนกผู้ยืม *</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="edit-borrower-dept" placeholder="เช่น นักศึกษา ปี 3">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label for="edit-borrower-date" style="font-size: 0.75rem;">วันที่ยืมเครื่อง *</label>
+                                <div class="input-wrapper">
+                                    <input type="date" id="edit-borrower-date">
+                                </div>
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label for="edit-borrower-return" style="font-size: 0.75rem;">กำหนดส่งคืน *</label>
+                                <div class="input-wrapper">
+                                    <input type="date" id="edit-borrower-return">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="padding-top: 10px;">
+                        <button type="button" class="btn btn-outline" id="btn-cancel-edit">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary btn-glow">
+                            <i data-lucide="save"></i>
+                            <span>บันทึกข้อมูลครุภัณฑ์</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
