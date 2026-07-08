@@ -176,7 +176,7 @@ let state = {
    INITIALIZATION & API CONFIG
    ========================================================================== */
 // ป้อน URL หลังบ้านที่ได้รับจาก Render ที่นี่ (เช่น "https://equipment-borrowing-api.onrender.com/api")
-const DEPLOYED_API_URL = "https://your-backend-name.onrender.com/api";
+const DEPLOYED_API_URL = "https://equipment-borrowing-system.onrender.com/api";
 
 const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:"
     ? "http://localhost:5000/api"
