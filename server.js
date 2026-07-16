@@ -522,28 +522,100 @@ app.post('/api/equipment/:id/borrow', async (req, res) => {
     try {
         const itemRes = await pool.query("SELECT * FROM equipment WHERE id = $1", [id]);
         const item = itemRes.rows[0];
-        if (!item || item.status === "Borrowed") {
+        if (!item || item.status !== "Available") {
             return res.status(400).json({ error: "อุปกรณ์ไม่พร้อมสำหรับทำรายการยืม" });
         }
 
-        // Update Equipment
+        // Update Equipment to Pending
         await pool.query(
-            "UPDATE equipment SET status = 'Borrowed', borrowed_by_username = $1, borrow_date = $2, expected_return_date = $3 WHERE id = $4",
+            "UPDATE equipment SET status = 'Pending', borrowed_by_username = $1, borrow_date = $2, expected_return_date = $3 WHERE id = $4",
             [username, todayStr, expectedReturnDate, id]
         );
 
         // Create History Log
         const histId = "hist-" + Date.now();
         await pool.query(
-            "INSERT INTO history (id, timestamp, type, user_id, user_name, user_dept, item_id, item_name, item_code, borrow_date, expected_return_date, status) VALUES ($1, $2, 'borrow', $3, $4, $5, $6, $7, $8, $9, $10, 'Borrowed')",
+            "INSERT INTO history (id, timestamp, type, user_id, user_name, user_dept, item_id, item_name, item_code, borrow_date, expected_return_date, status) VALUES ($1, $2, 'borrow', $3, $4, $5, $6, $7, $8, $9, $10, 'Pending')",
             [histId, new Date().toISOString(), username, name, department, id, item.name, item.code, todayStr, expectedReturnDate]
         );
 
-        res.json({ success: true, message: "ทำรายการยืมอุปกรณ์เรียนสำเร็จ" });
+        res.json({ success: true, message: "ส่งคำขอการยืมสำเร็จแล้ว รอการยืนยันและอนุมัติจากอาจารย์" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Approve Borrow Request (Admin Only)
+app.post('/api/equipment/:id/approve', async (req, res) => {
+    const { id } = req.params;
+    const { userRole } = req.body;
+
+    if (userRole !== 'admin') {
+        return res.status(403).json({ error: "สิทธิ์การเข้าใช้งานเฉพาะผู้ดูแลเท่านั้น" });
+    }
+
+    try {
+        const itemRes = await pool.query("SELECT * FROM equipment WHERE id = $1", [id]);
+        const item = itemRes.rows[0];
+        if (!item || item.status !== "Pending") {
+            return res.status(400).json({ error: "ไม่พบคำขอการยืมที่รอการอนุมัติสำหรับอุปกรณ์นี้" });
+        }
+
+        // Update status to Borrowed
+        await pool.query(
+            "UPDATE equipment SET status = 'Borrowed' WHERE id = $1",
+            [id]
+        );
+
+        // Update History log
+        await pool.query(
+            "UPDATE history SET status = 'Borrowed' WHERE item_id = $1 AND user_id = $2 AND status = 'Pending'",
+            [id, item.borrowed_by_username]
+        );
+
+        res.json({ success: true, message: "อนุมัติรายการยืมอุปกรณ์สำเร็จเรียบร้อย" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Reject/Cancel Borrow Request (Admin or Borrower)
+app.post('/api/equipment/:id/reject', async (req, res) => {
+    const { id } = req.params;
+    const { username, userRole } = req.body;
+
+    try {
+        const itemRes = await pool.query("SELECT * FROM equipment WHERE id = $1", [id]);
+        const item = itemRes.rows[0];
+        if (!item || item.status !== "Pending") {
+            return res.status(400).json({ error: "ไม่พบคำขอการยืมที่รอการอนุมัติสำหรับอุปกรณ์นี้" });
+        }
+
+        if (userRole !== 'admin' && item.borrowed_by_username !== username) {
+            return res.status(403).json({ error: "ไม่มีสิทธิ์ในการยกเลิกหรือปฏิเสธคำขอนี้" });
+        }
+
+        const borrowerUsername = item.borrowed_by_username;
+
+        // Reset Equipment columns
+        await pool.query(
+            "UPDATE equipment SET status = 'Available', borrowed_by_username = NULL, borrow_date = NULL, expected_return_date = NULL WHERE id = $1",
+            [id]
+        );
+
+        // Update History log status to Rejected / Cancelled
+        const finalStatus = userRole === 'admin' ? 'Rejected' : 'Cancelled';
+        await pool.query(
+            "UPDATE history SET status = $1 WHERE item_id = $2 AND user_id = $3 AND status = 'Pending'",
+            [finalStatus, id, borrowerUsername]
+        );
+
+        res.json({ success: true, message: userRole === 'admin' ? "ปฏิเสธรายการยืมเรียบร้อยแล้ว" : "ยกเลิกคำขอการยืมสำเร็จ" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 // Return Equipment
 app.post('/api/equipment/:id/return', async (req, res) => {

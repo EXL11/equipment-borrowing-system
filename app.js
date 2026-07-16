@@ -739,7 +739,7 @@ function updateDashboardStats() {
 
     if (state.currentUser) {
         const myItemsCount = state.equipment.filter(
-            e => e.status === "Borrowed" && e.borrowedBy && e.borrowedBy.username === state.currentUser.username
+            e => (e.status === "Borrowed" || e.status === "Pending") && e.borrowedBy && e.borrowedBy.username === state.currentUser.username
         ).length;
 
         const myItemsBadge = document.getElementById("my-borrow-count");
@@ -786,6 +786,7 @@ function renderEquipmentGrid() {
 
     filteredItems.forEach(item => {
         const isBorrowed = item.status === "Borrowed";
+        const isPending = item.status === "Pending";
         let statusBadgeClass = "badge-purple";
         let statusText = "พร้อมให้ยืม";
         let cardBorderGlow = "";
@@ -808,6 +809,45 @@ function renderEquipmentGrid() {
                     <button class="btn btn-outline btn-block btn-sm" disabled>
                         <i data-lucide="lock"></i>
                         <span>ไม่ว่าง (ถูกยืมใช้งาน)</span>
+                    </button>
+                `;
+            }
+        } else if (isPending) {
+            statusBadgeClass = "badge-pending";
+            statusText = "รออนุมัติ";
+            cardBorderGlow = "border: 1px solid rgba(14, 165, 233, 0.25);";
+
+            if (state.currentUser && state.currentUser.role === 'admin') {
+                actionButtonHTML = `
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button class="btn btn-primary btn-block btn-glow btn-sm" onclick="approveBorrow('${item.id}')" style="background: linear-gradient(135deg, #10B981, #059669); border-color: #10B981; flex: 1;">
+                            <i data-lucide="check"></i>
+                            <span>อนุมัติ</span>
+                        </button>
+                        <button class="btn btn-danger btn-block btn-glow btn-sm" onclick="rejectBorrow('${item.id}')" style="background: linear-gradient(135deg, #EF4444, #DC2626); border-color: #EF4444; flex: 1;">
+                            <i data-lucide="x"></i>
+                            <span>ปฏิเสธ</span>
+                        </button>
+                    </div>
+                `;
+            } else if (state.currentUser && item.borrowedBy && item.borrowedBy.username === state.currentUser.username) {
+                actionButtonHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                        <button class="btn btn-outline btn-block btn-sm" disabled style="color: #0284c7; border-color: #7dd3fc; background: rgba(14, 165, 233, 0.05);">
+                            <i data-lucide="clock"></i>
+                            <span>รออาจารย์อนุมัติการยืม</span>
+                        </button>
+                        <button class="btn btn-danger btn-block btn-glow btn-sm" onclick="rejectBorrow('${item.id}')" style="padding: 8px 16px; font-size: 0.8rem;">
+                            <i data-lucide="trash-2"></i>
+                            <span>ยกเลิกคำขอ</span>
+                        </button>
+                    </div>
+                `;
+            } else {
+                actionButtonHTML = `
+                    <button class="btn btn-outline btn-block btn-sm" disabled>
+                        <i data-lucide="lock"></i>
+                        <span>ไม่ว่าง (รออนุมัติ)</span>
                     </button>
                 `;
             }
@@ -854,11 +894,11 @@ function renderEquipmentGrid() {
                     <h4 title="${item.name}">${item.name}</h4>
                     <p class="spec-text" title="${item.specs}">${item.specs}</p>
                     
-                    ${isBorrowed && item.borrowedBy ? `
+                    ${(isBorrowed || isPending) && item.borrowedBy ? `
                         <div class="borrow-info-block">
                             <span><i data-lucide="user"></i> ผู้ใช้: <strong>${item.borrowedBy.name}</strong></span>
                             <span><i data-lucide="book-open"></i> ชั้นเรียน: <strong>${item.borrowedBy.department}</strong></span>
-                            <span><i data-lucide="calendar"></i> คืนภายใน: <strong>${formatThaiDate(item.borrowedBy.expectedReturnDate)}</strong></span>
+                            <span><i data-lucide="calendar"></i> ${isPending ? 'ขอรับภายใน' : 'คืนภายใน'}: <strong>${formatThaiDate(item.borrowedBy.expectedReturnDate)}</strong></span>
                         </div>
                     ` : ''}
                 </div>
@@ -885,7 +925,7 @@ function renderMyBorrowedItems() {
     tableBody.innerHTML = "";
 
     const myBorrowed = state.equipment.filter(
-        item => item.status === "Borrowed" && item.borrowedBy && item.borrowedBy.username === state.currentUser.username
+        item => (item.status === "Borrowed" || item.status === "Pending") && item.borrowedBy && item.borrowedBy.username === state.currentUser.username
     );
 
     if (myBorrowed.length === 0) {
@@ -905,6 +945,29 @@ function renderMyBorrowedItems() {
         else if (item.category === "Keyboard") categoryIcon = "keyboard";
         else if (item.category === "Charger") categoryIcon = "zap";
 
+        const isPending = item.status === "Pending";
+        let actionBtnHTML = "";
+        let statusBadgeHTML = "";
+        let returnDateHTML = "";
+
+        if (isPending) {
+            statusBadgeHTML = `<span class="badge badge-pending">รออนุมัติ</span>`;
+            returnDateHTML = `<span style="color: #0284c7; font-weight:700;">รอการอนุมัติ</span>`;
+            actionBtnHTML = `
+                <button class="btn btn-danger btn-block btn-glow btn-xs" onclick="rejectBorrow('${item.id}')">
+                    <i data-lucide="trash-2"></i> ยกเลิกคำขอ
+                </button>
+            `;
+        } else {
+            statusBadgeHTML = `<span class="badge badge-orange">ยืมใช้งาน</span>`;
+            returnDateHTML = `<strong style="color: var(--accent-orange);">${formatThaiDate(item.borrowedBy.expectedReturnDate)}</strong>`;
+            actionBtnHTML = `
+                <button class="btn btn-outline btn-glow btn-xs" onclick="returnEquipment('${item.id}')" style="border-color: rgba(220, 38, 38, 0.3); color: var(--accent-red);">
+                    <i data-lucide="corner-down-left"></i> กดคืน
+                </button>
+            `;
+        }
+
         const row = document.createElement("tr");
         row.className = "table-row-item";
         row.innerHTML = `
@@ -920,13 +983,16 @@ function renderMyBorrowedItems() {
                     </div>
                 </div>
             </td>
-            <td><span class="badge badge-blue">${item.category}</span></td>
-            <td>${formatThaiDate(item.borrowedBy.borrowDate)}</td>
-            <td><strong style="color: var(--accent-orange);">${formatThaiDate(item.borrowedBy.expectedReturnDate)}</strong></td>
             <td>
-                <button class="btn btn-outline btn-glow btn-xs" onclick="returnEquipment('${item.id}')" style="border-color: rgba(220, 38, 38, 0.3); color: var(--accent-red);">
-                    <i data-lucide="corner-down-left"></i> กดคืน
-                </button>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span class="badge badge-blue" style="width:fit-content;">${item.category}</span>
+                    ${statusBadgeHTML}
+                </div>
+            </td>
+            <td>${formatThaiDate(item.borrowedBy.borrowDate)}</td>
+            <td>${returnDateHTML}</td>
+            <td>
+                ${actionBtnHTML}
             </td>
         `;
         tableBody.appendChild(row);
@@ -975,7 +1041,13 @@ function renderHistoryTable() {
 
         if (isBorrow) {
             if (log.status === "Borrowed") {
-                typeBadgeHTML = `<span class="badge badge-orange"><i data-lucide="clock" style="width:10px;height:10px;margin-right:4px;"></i>กำลังใช้เรียน</span>`;
+                typeBadgeHTML = `<span class="badge badge-orange"><i data-lucide="clock" style="width:10px;height:10px;margin-right:4px;"></i>ยืมใช้เรียน</span>`;
+            } else if (log.status === "Pending") {
+                typeBadgeHTML = `<span class="badge badge-pending"><i data-lucide="clock" style="width:10px;height:10px;margin-right:4px;"></i>รออาจารย์อนุมัติ</span>`;
+            } else if (log.status === "Rejected") {
+                typeBadgeHTML = `<span class="badge badge-red"><i data-lucide="x" style="width:10px;height:10px;margin-right:4px;"></i>ปฏิเสธการยืม</span>`;
+            } else if (log.status === "Cancelled") {
+                typeBadgeHTML = `<span class="badge badge-red"><i data-lucide="trash-2" style="width:10px;height:10px;margin-right:4px;"></i>ยกเลิกคำขอ</span>`;
             } else {
                 typeBadgeHTML = `<span class="badge badge-blue">รอส่งมอบ</span>`;
             }
@@ -1244,6 +1316,130 @@ async function returnEquipment(itemId) {
         renderHistoryTable();
 
         showToast(`[โหมดออฟไลน์] ส่งคืนอุปกรณ์ "${item.name}" เข้าระบบเรียบร้อย!`, "warning");
+    }
+}
+
+/* ==========================================================================
+   APPROVE & REJECT ACTION FLOW
+   ========================================================================== */
+async function approveBorrow(itemId) {
+    if (state.currentUser.role !== "admin") {
+        showToast("สิทธิ์การอนุมัติเฉพาะผู้ดูแลระบบเท่านั้น", "error");
+        return;
+    }
+
+    const item = state.equipment.find(e => e.id === itemId);
+    if (!item) return;
+
+    if (!confirm(`คุณต้องการยืนยันการอนุมัติให้คุณ "${item.borrowedBy ? item.borrowedBy.name : 'นักศึกษา'}" ยืม "${item.name}" ใช่หรือไม่?`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/equipment/${itemId}/approve`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userRole: state.currentUser.role
+            })
+        });
+
+        if (res.ok) {
+            state.isOffline = false;
+            await loadState();
+
+            updateDashboardStats();
+            renderEquipmentGrid();
+            renderMyBorrowedItems();
+            renderHistoryTable();
+
+            showToast(`อนุมัติคำขอการยืมอุปกรณ์ "${item.name}" เรียบร้อยแล้ว!`, "success");
+        } else {
+            const data = await res.json().catch(() => ({}));
+            showToast(data.error || "เกิดข้อผิดพลาดในการอนุมัติการยืม", "error");
+        }
+    } catch (err) {
+        console.warn("Approve server offline, falling back to local execution:", err);
+        const itemIndex = state.equipment.findIndex(e => e.id === itemId);
+        if (itemIndex !== -1 && state.equipment[itemIndex].status === "Pending") {
+            state.equipment[itemIndex].status = "Borrowed";
+            const activeHistoryIndex = state.history.findIndex(
+                h => h.itemId === itemId && h.status === "Pending"
+            );
+            if (activeHistoryIndex !== -1) {
+                state.history[activeHistoryIndex].status = "Borrowed";
+            }
+            state.isOffline = true;
+            saveStateToStorage();
+            updateDashboardStats();
+            renderEquipmentGrid();
+            renderMyBorrowedItems();
+            renderHistoryTable();
+            showToast(`[โหมดออฟไลน์] อนุมัติการยืมอุปกรณ์ "${item.name}" เรียบร้อย!`, "warning");
+        }
+    }
+}
+
+async function rejectBorrow(itemId) {
+    const item = state.equipment.find(e => e.id === itemId);
+    if (!item) return;
+
+    const isUserRoleAdmin = state.currentUser.role === "admin";
+    const promptMsg = isUserRoleAdmin 
+        ? `คุณต้องการปฏิเสธคำขอการยืมอุปกรณ์ "${item.name}" ใช่หรือไม่?`
+        : `คุณต้องการยกเลิกคำขอการยืมอุปกรณ์ "${item.name}" ใช่หรือไม่?`;
+
+    if (!confirm(promptMsg)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/equipment/${itemId}/reject`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: state.currentUser.username,
+                userRole: state.currentUser.role
+            })
+        });
+
+        if (res.ok) {
+            state.isOffline = false;
+            await loadState();
+
+            updateDashboardStats();
+            renderEquipmentGrid();
+            renderMyBorrowedItems();
+            renderHistoryTable();
+
+            const toastMsg = isUserRoleAdmin ? "ปฏิเสธคำขอการยืมอุปกรณ์เสร็จสิ้น" : "ยกเลิกคำขอการยืมอุปกรณ์เรียบร้อยแล้ว";
+            showToast(toastMsg, "success");
+        } else {
+            const data = await res.json().catch(() => ({}));
+            showToast(data.error || "เกิดข้อผิดพลาดในการดำเนินรายการ", "error");
+        }
+    } catch (err) {
+        console.warn("Reject server offline, falling back to local execution:", err);
+        const itemIndex = state.equipment.findIndex(e => e.id === itemId);
+        if (itemIndex !== -1 && state.equipment[itemIndex].status === "Pending") {
+            state.equipment[itemIndex].status = "Available";
+            state.equipment[itemIndex].borrowedBy = null;
+
+            const activeHistoryIndex = state.history.findIndex(
+                h => h.itemId === itemId && h.status === "Pending"
+            );
+            if (activeHistoryIndex !== -1) {
+                state.history[activeHistoryIndex].status = isUserRoleAdmin ? "Rejected" : "Cancelled";
+            }
+
+            state.isOffline = true;
+            saveStateToStorage();
+            updateDashboardStats();
+            renderEquipmentGrid();
+            renderMyBorrowedItems();
+            renderHistoryTable();
+            showToast(`[โหมดออฟไลน์] ดำเนินการปฏิเสธ/ยกเลิกรายการเสร็จสิ้น!`, "warning");
+        }
     }
 }
 
